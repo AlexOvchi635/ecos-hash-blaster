@@ -383,8 +383,7 @@ body.shake{animation:shake .12s linear infinite;}
 <!-- START SCREEN -->
 <div class="start-screen" id="startScreen">
   <div class="start-art" id="startArt">
-    <span class="coin">₿</span>
-    <span class="ph">key art — placeholder</span>
+    <img src="assets/logo.png" alt="ECOS Hash Blaster" style="width:100%;height:100%;object-fit:contain;">
   </div>
   <h1 class="start-title">ECOS Hash Blaster</h1>
   <button class="start-btn" id="startBtn">START</button>
@@ -412,6 +411,8 @@ body.shake{animation:shake .12s linear infinite;}
       <button data-dev="raffle-lose">Raffle miss</button>
       <button data-dev="board">Leaderboard</button>
     </div>
+    <div class="dev-sec">God</div>
+    <div class="dev-grid"><button data-dev="god" class="dev-grid__btn--wide" style="grid-column:1/-1;background:rgba(234,88,12,.28);color:#fff;">🔱 GOD RUN — 10 пушек, босс с 3 выстрелов</button></div>
     <div class="dev-sec">Cheats</div>
     <div class="dev-grid">
       <button data-dev="mp">+2k MP</button>
@@ -480,6 +481,7 @@ const state = {
 };
 function dangerY(){ return H - 150; }
 function hitZoneTop(){ return 54; }   // right under the HUD — boxes hittable everywhere below, not while hidden behind the top bar
+const shipImg=new Image(); shipImg.src='assets/ship.png';   // player ship sprite
 state.rig.x = W/2; state.rig.y = H - 78;
 function rand(a,b){return a+Math.random()*(b-a);}
 
@@ -928,12 +930,7 @@ function render(){
   ctx.fillStyle='rgba(220,38,38,.6)'; ctx.font='bold 9px monospace'; ctx.textAlign='left'; ctx.textBaseline='top';
   ctx.fillText('⚠ DANGER ZONE', 8, dy2+4);
 
-  // hit zone starts right under the HUD — boxes above it (hidden behind the bar) can't be hit
-  const hz=hitZoneTop();
-  ctx.strokeStyle='rgba(37,99,235,.4)'; ctx.lineWidth=1.5; ctx.setLineDash([8,6]);
-  ctx.beginPath(); ctx.moveTo(0,hz); ctx.lineTo(W,hz); ctx.stroke(); ctx.setLineDash([]);
-  ctx.fillStyle='rgba(37,99,235,.55)'; ctx.font='bold 8px monospace'; ctx.textAlign='right'; ctx.textBaseline='top';
-  ctx.fillText('HIT ZONE ▼', W-8, hz+3);
+  // hit zone is invisible now (mechanic still active: boxes above hitZoneTop() can't be hit)
 
   // prizes
   const hzT=hitZoneTop();
@@ -1045,11 +1042,16 @@ function render(){
   // rig
   const r=state.rig;
   ctx.save(); ctx.translate(r.x,r.y); ctx.rotate(r.angle+Math.PI/2);
-  ctx.shadowColor='rgba(234,88,12,.4)'; ctx.shadowBlur=12; ctx.shadowOffsetY=2;
-  ctx.fillStyle=C.o1; ctx.strokeStyle='#c2410c'; ctx.lineWidth=2;
-  ctx.beginPath(); ctx.moveTo(0,-r.r); ctx.lineTo(r.r*.8,r.r*.7); ctx.lineTo(0,r.r*.4); ctx.lineTo(-r.r*.8,r.r*.7); ctx.closePath(); ctx.fill();
-  ctx.shadowBlur=0; ctx.shadowOffsetY=0; ctx.stroke();
-  ctx.fillStyle='#ffffff'; ctx.font='bold 12px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('₿',0,0);
+  if(shipImg.complete && shipImg.naturalWidth){
+    const sh=r.r*2.7, sw=sh*shipImg.naturalWidth/shipImg.naturalHeight;
+    ctx.drawImage(shipImg, -sw/2, -sh*0.42, sw, sh);   // nose forward, body/flame trailing
+  } else {
+    ctx.shadowColor='rgba(234,88,12,.4)'; ctx.shadowBlur=12; ctx.shadowOffsetY=2;
+    ctx.fillStyle=C.o1; ctx.strokeStyle='#c2410c'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(0,-r.r); ctx.lineTo(r.r*.8,r.r*.7); ctx.lineTo(0,r.r*.4); ctx.lineTo(-r.r*.8,r.r*.7); ctx.closePath(); ctx.fill();
+    ctx.shadowBlur=0; ctx.shadowOffsetY=0; ctx.stroke();
+    ctx.fillStyle='#ffffff'; ctx.font='bold 12px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText('₿',0,0);
+  }
   ctx.restore();
 
   if(state.combo>0){ ctx.strokeStyle='rgba(37,99,235,'+Math.min(.8,state.comboTimer/2.2)+')'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(r.x,r.y,r.r+9,-Math.PI/2,-Math.PI/2+Math.PI*2*(state.comboTimer/2.2)); ctx.stroke(); }
@@ -1108,6 +1110,15 @@ document.getElementById('startLbBtn').addEventListener('click',()=>openDrawer('l
     else if(a==='gun'){ if(state.guns<ECO.GUN_MAX) state.guns++; else state.dmg++; }
     else if(a==='pow'){ state.dmg++; }
     else if(a==='tix'){ state.tix+=5; }
+    else if(a==='god'){
+      hideAll(); clearPauses(); state.gameOver=false;
+      state.wave=1; state.waveDrops=0; state.lvlSpawnCount=0; state.waveTotal=ECO.BASE_WAVE_DROPS+ECO.WAVE_DROP_SCALE;
+      state.guns=10; state.dmg=150;                 // 10 cannons + huge dmg → any boss dies in ~3 shots
+      state.mp=999999; state.tix=0; state.runPass=false; state.raffleThenWin=false; state.passPity=0;
+      state.hashes=[]; state.prizes=[]; state.bosses=[]; state.particles=[]; state.floaters=[];
+      state.bossActive=false; state.bossPending=false; state.nextSpawnT=0.4; state.combo=0;
+      state.screenShake=0; state.boundaryFlash=0; updateWaveBar();
+    }
   });
 })();
 
