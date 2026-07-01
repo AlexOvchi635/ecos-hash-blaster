@@ -322,7 +322,7 @@ body.shake{animation:shake .12s linear infinite;}
     <h2 style="color:var(--green);">You win!</h2>
     <p>You beat every boss. Rewards banked:</p>
     <div class="win-reward">🎟 <b id="winTix">0</b> tickets</div>
-    <div class="win-reward win-reward--pass" id="winPass" style="display:none;">🎫 Raffle pass won! <span style="color:var(--muted);font-size:12px">(1% drop)</span></div>
+    <div class="win-reward win-reward--pass" id="winPass" style="display:none;">🎫 Raffle pass won!</div>
     <div class="btn-row"><button class="btn-cta" id="winRestart">Play again</button></div>
   </div>
 </div>
@@ -337,10 +337,10 @@ body.shake{animation:shake .12s linear infinite;}
     <div class="raffle-reel__sweep" id="raffleSweep"></div>
   </div>
   <div class="box raffle-card" id="raffleCard">
-    <div class="box__eyebrow" id="raffleEyebrow" style="color:var(--pass);">Closed raffle · ECOS Monthly Final</div>
+    <div class="box__eyebrow" id="raffleEyebrow" style="color:var(--pass);">Closed raffle</div>
     <span class="pass-icon" id="raffleIcon">🎫</span>
     <h2 id="raffleTitle">Raffle pass!</h2>
-    <p id="raffleText">You won an entry to the <b style="color:var(--ink);">ECOS closed raffle</b> — mining contracts + MP prizes.</p>
+    <p id="raffleText">You won an entry to the <b style="color:var(--ink);">ECOS closed raffle</b>.</p>
     <div class="btn-row"><button class="btn-cta" id="raffleOk">Awesome!</button></div>
   </div>
 </div>
@@ -387,7 +387,6 @@ body.shake{animation:shake .12s linear infinite;}
     <span class="ph">key art — placeholder</span>
   </div>
   <h1 class="start-title">ECOS Hash Blaster</h1>
-  <p class="start-sub">Tap to shoot · 1 MP per shot · tickets drop from bosses (Lvl 5+)</p>
   <button class="start-btn" id="startBtn">START</button>
   <button class="start-lb" id="startLbBtn" style="display:none;">🏆 Leaderboard</button>
 </div>
@@ -701,7 +700,6 @@ function triggerGameOver(){
   const lost=state.tix;   // unbanked run tickets are lost
   document.getElementById('goText').innerHTML=
     `You reached <b style="color:${C.orange}">Level ${state.wave}</b> of ${ECO.MAX_LEVEL}.<br>`+
-    (state.bankedTIX>0?`Banked so far: 🎟 <b style="color:${C.tix}">${state.bankedTIX}</b><br>`:'')+
     (lost>0
       ? `<span style="color:var(--muted)">Lost this run: 🎟 ${lost} — cash out next time!</span>`
       : `<span style="color:var(--muted)">No tickets yet — tickets start at Level 5.</span>`);
@@ -785,16 +783,16 @@ function revealResult(win){
   const card=document.getElementById('raffleCard');
   card.classList.toggle('lose', !win);
   if(win){
-    document.getElementById('raffleEyebrow').textContent='Closed raffle · ECOS Monthly Final';
+    document.getElementById('raffleEyebrow').textContent='Closed raffle';
     document.getElementById('raffleIcon').textContent='🎫';
     document.getElementById('raffleTitle').textContent='Raffle pass won!';
-    document.getElementById('raffleText').innerHTML='You won an entry to the <b style="color:var(--ink);">ECOS closed raffle</b> — mining contracts + MP prizes.';
+    document.getElementById('raffleText').innerHTML='You won an entry to the <b style="color:var(--ink);">ECOS closed raffle</b>.';
     card.classList.add('show'); fireConfetti(); pulseStat('statPass');
   } else {
     document.getElementById('raffleEyebrow').textContent='Raffle draw';
     document.getElementById('raffleIcon').textContent='🪙';
     document.getElementById('raffleTitle').textContent='No pass this time';
-    document.getElementById('raffleText').innerHTML='The pass drops at just <b style="color:var(--ink);">1%</b> — but you still cleared all '+ECO.MAX_LEVEL+' levels!';
+    document.getElementById('raffleText').innerHTML='But you still cleared all '+ECO.MAX_LEVEL+' levels!';
     card.classList.add('show');
   }
 }
