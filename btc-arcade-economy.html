@@ -90,6 +90,8 @@
         <div class="fact"><div class="ic" style="background:#fef2f2;color:#dc2626">✕</div><div class="tx"><b>Красный = −1…−5 MP</b><small>НЕ стреляй — теряешь MP. Пролетает вниз без штрафа, просто пропусти</small></div></div>
         <div class="fact"><div class="ic">🧱</div><div class="tx"><b>Стенки + сильный рикошет</b><small>Блок бьётся о край и отскакивает быстрее — не улетает за экран</small></div></div>
         <div class="fact"><div class="ic">💨</div><div class="tx"><b>~18% блоков летят вдвое быстрее</b><small>Со шлейфом — успевай сбивать, добавляет напряжения</small></div></div>
+        <div class="fact"><div class="ic" style="background:#eff5ff;color:var(--blue)">▼</div><div class="tx"><b>HIT ZONE — урон только в зоне</b><small>Блоки сбиваются только когда войдут в активную зону (не вслепую сверху)</small></div></div>
+        <div class="fact"><div class="ic">⚡</div><div class="tx"><b>Скорость растёт +8% за уровень</b><small>+20% базово, к 7-му уровню заметно быстрее</small></div></div>
       </div>
     </div>
 
@@ -146,7 +148,7 @@
 
     // levels table
     var total=0, body='';
-    var rewards={5:'<span class="rw g">2</span>',6:'<span class="rw o">3</span>',7:'<span class="rw v">🎫</span>'};
+    var rewards={5:'<span class="rw g">2</span>',6:'<span class="rw o">3</span>',7:'<span class="rw v">🎫 2×1%</span>'};
     for(var w=1;w<=MAX;w++){
       var p=power(w); var n=net(w); total+=n;
       var boost=w<=3?('🔫→'+p.guns):('⚡×'+p.dmg);

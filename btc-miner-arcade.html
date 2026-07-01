@@ -447,7 +447,7 @@ const ECO = {
   SHOT_COST:1, FIRE_RATE_MS:85, GUN_MAX:4,       // max 4 cannons — then boxes give +1 damage (power)
   MAX_LEVEL:7, START_MP:2000,                     // standalone demo start; in loyalty = player's real MP balance
   BASE_WAVE_DROPS:26, WAVE_DROP_SCALE:4,          // LONG levels — 30..54 blocks before the boss
-  FALL_STEP:0.03,                                 // block fall speed +3% per level
+  FALL_STEP:0.08,                                 // block fall speed +8% per level (ramps noticeably)
   MP_BOX_MIN:1, MP_BOX_MAX:3, SAT_MP:1,           // box returns 1–3 MP (mostly 1) — burn more MP
   RAFFLE_LEVEL:7, RAFFLE_CHANCE:0.01,             // pass drops only on the Lvl 7 (final) boss, 1%
 };
@@ -479,6 +479,7 @@ const state = {
   bossesKilledThisRun:0, sessionStart: performance.now()
 };
 function dangerY(){ return H - 150; }
+function hitZoneTop(){ return H*0.34; }   // boxes only take damage below this line (no blind sniping at top)
 state.rig.x = W/2; state.rig.y = H - 78;
 function rand(a,b){return a+Math.random()*(b-a);}
 
@@ -651,6 +652,10 @@ function onBossDeath(b){
     state.tix+=tix; state.totalTIXEarned+=tix;
     addFloater(b.x,b.y,'+'+tix+' 🎟',C.tix); explodeMP(b.x,b.y,C.tix,28);
   }
+  // raffle pass: EACH final-level boss rolls its own 1% (2 bosses → ~1.99%); max 1 pass per run
+  if(state.wave===ECO.RAFFLE_LEVEL && !state.runPass && Math.random()<ECO.RAFFLE_CHANCE){
+    state.runPass=true; state.passes++; state.totalPassesDropped++;
+  }
   state.totalBossesKilled++; state.bossesKilledThisRun++;
   explodeMP(b.x,b.y,C.orange,34); spawnFirework(b.x,b.y,C.o1);
 }
@@ -660,9 +665,7 @@ function onWaveCleared(){
   state.totalWavesCleared++;
   state.bossActive=false;
   if(state.wave>=ECO.MAX_LEVEL){
-    // Final level beaten → ALWAYS spin the raffle reel; it lands on a pass at 1%.
-    state.runPass = Math.random() < ECO.RAFFLE_CHANCE;
-    if(state.runPass){ state.passes++; state.totalPassesDropped++; }
+    // Final level beaten → spin the raffle reel; pass was already rolled per-boss (1% each)
     state.raffleThenWin = true;
     showRaffleReel(state.runPass);
     return;
@@ -848,7 +851,7 @@ function update(dt){
   state.rig.x += (W/2-state.rig.x)*dt*1.5; state.rig.y=H-78;
   if(state.boundaryFlash>0) state.boundaryFlash=Math.max(0,state.boundaryFlash-dt*2);
   if(state.comboTimer>0){ state.comboTimer-=dt; if(state.comboTimer<=0) state.combo=0; }
-  if(!state.bossActive && !state.bossPending && state.waveDrops<state.waveTotal){ state.nextSpawnT-=dt; if(state.nextSpawnT<=0){ spawnPrize(); state.nextSpawnT=rand(0.35,0.75); } }
+  if(!state.bossActive && !state.bossPending && state.waveDrops<state.waveTotal){ state.nextSpawnT-=dt; if(state.nextSpawnT<=0){ spawnPrize(); state.nextSpawnT=rand(0.22,0.5); } }
   for(const p of state.prizes){
     p.x+=p.vx*dt; p.y+=p.vy*dt; p.rot+=p.spin*dt;
     const m=p.sz/2;                                        // bounce off side walls — stronger ricochet
@@ -875,7 +878,8 @@ function update(dt){
   if(state.bossEntrance>0) state.bossEntrance-=dt;
   if(state.screenShake>0) state.screenShake=Math.max(0,state.screenShake-dt*1.5);
   for(const h of state.hashes){ h.x+=h.vx*dt; h.y+=h.vy*dt; h.life-=dt; }
-  for(const h of state.hashes){ if(h.life<=0) continue; for(const p of state.prizes){ if(p.hp<=0) continue; const dx=h.x-p.x,dy=h.y-p.y; if(dx*dx+dy*dy<p.sz*p.sz*0.5){ h.life=0; p.hp=0; rewardPrize(p); break; } } }
+  const hzTop=hitZoneTop();
+  for(const h of state.hashes){ if(h.life<=0) continue; for(const p of state.prizes){ if(p.hp<=0 || p.y<hzTop) continue; const dx=h.x-p.x,dy=h.y-p.y; if(dx*dx+dy*dy<p.sz*p.sz*0.5){ h.life=0; p.hp=0; rewardPrize(p); break; } } }
   for(const h of state.hashes){
     if(h.life<=0) continue; let hit=false;
     for(const b of state.bosses){ if(b.dead) continue; for(const s of b.satellites){ if(s.dead) continue; const dx=h.x-s.x,dy=h.y-s.y; if(dx*dx+dy*dy<s.sz*s.sz*0.6){ h.life=0; hitSatellite(s,h.x,h.y); hit=true; break; } } if(hit) break; }
@@ -925,9 +929,19 @@ function render(){
   ctx.fillStyle='rgba(220,38,38,.6)'; ctx.font='bold 9px monospace'; ctx.textAlign='left'; ctx.textBaseline='top';
   ctx.fillText('⚠ DANGER ZONE', 8, dy2+4);
 
+  // hit zone — boxes only take damage below this line
+  const hz=hitZoneTop();
+  ctx.fillStyle='rgba(37,99,235,.04)'; ctx.fillRect(0,hz,W,dy2-hz);   // subtle active-zone tint
+  ctx.strokeStyle='rgba(37,99,235,.5)'; ctx.lineWidth=2; ctx.setLineDash([10,7]);
+  ctx.beginPath(); ctx.moveTo(0,hz); ctx.lineTo(W,hz); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle='rgba(37,99,235,.65)'; ctx.font='bold 9px monospace'; ctx.textAlign='left'; ctx.textBaseline='bottom';
+  ctx.fillText('▼ HIT ZONE — сбивай здесь', 8, hz-3);
+
   // prizes
+  const hzT=hitZoneTop();
   for(const p of state.prizes){
     ctx.save(); ctx.translate(p.x,p.y);
+    if(p.y<hzT) ctx.globalAlpha=0.4;   // above hit zone = not yet hittable (dimmed)
     if(p.type.t==='boost'){
       // premium glowing boost block
       const pulse=0.5+0.5*Math.sin(performance.now()*0.005+p.x*0.05);
