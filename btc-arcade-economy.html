@@ -108,10 +108,10 @@
       <div class="callout">Билеты забега «под риском»: заберёшь через <b>«Bank &amp; exit»</b> — они в сейфе. Умер — сгорают. Прошёл все 7 — банк автоматом.</div>
     </div>
 
-    <!-- Ticket probability graph -->
+    <!-- Pass probability graph -->
     <div class="card">
-      <h2>📈 Вероятность билета — 500 игроков</h2>
-      <p class="sub">Сколько из 500 получат хотя бы 1 билет в зависимости от числа забегов (игрок доходит до 4-го босса). Пунктир — половина (250).</p>
+      <h2>📈 Вероятность пасса 🎫 — 500 игроков</h2>
+      <p class="sub">Сколько из 500 получат раффл-пасс в зависимости от числа <b>полных прохождений</b> (7-й уровень, 2 босса по 7%). Пунктир — цель 250.</p>
       <div id="tixChart"></div>
       <div class="callout green" id="tixChartNote">—</div>
     </div>
@@ -125,7 +125,7 @@
         <tbody id="lvlBody"></tbody>
         <tfoot><tr class="total"><td colspan="5">Сжечь за всю игру</td><td class="num" id="totalMp">—</td><td>5 + 🎫</td></tr></tfoot>
       </table>
-      <div class="callout">🎟 <b>Скрытый бонус:</b> боссы уровней <b>1–4</b> роняют 1 билет с шансом <b>5% / 10% / 15% / 25%</b> (растёт по уровню). В самой игре это нигде не показано — только здесь, в экономике.</div>
+      <div class="callout">🎟 <b>Скрытый бонус:</b> боссы уровней <b>1–4</b> роняют 1 билет с шансом <b>1% / 2% / 3% / 5%</b> (растёт по уровню). В самой игре это нигде не показано — только здесь, в экономике.</div>
       <div class="callout green">Один забег жжёт <b>~<span id="burn2">600</span> MP</b> и почти ничего не возвращает. Новичок в кликере зарабатывает <b>~50–300 MP/день</b> — игра съедает несколько дней дохода. <b>Кликер копит — игра тратит.</b></div>
     </div>
 
@@ -135,7 +135,7 @@
   <script>
     // ── same constants as the game ──
     var BOSS_HP=[0,45,75,110,230,300,1000,2000];
-    var EARLY_TIX=[0,5,10,15,25];   // L1-4 ticket % (grows by level)
+    var EARLY_TIX=[0,1,2,3,5];   // L1-4 ticket % (grows by level)
     var TIERS=['Бронза','Сталь','Золото','Сапфир','Пламя','Аметист','Рубин'];
     var MAX=7, BASE=26, SCALE=4, RET=1.5, GUN_MAX=4;
     function drops(w){ return BASE+w*SCALE; }
@@ -156,7 +156,7 @@
 
     // levels table
     var total=0, body='';
-    var rewards={5:'<span class="rw g">2</span>',6:'<span class="rw o">3</span>',7:'<span class="rw v">🎫 2×1%</span>'};
+    var rewards={5:'<span class="rw g">2</span>',6:'<span class="rw o">3</span>',7:'<span class="rw v">🎫 2×7%</span>'};
     for(var w=1;w<=MAX;w++){
       var p=power(w); var n=net(w); total+=n;
       var boost=w<=3?('🔫→'+p.guns):('⚡×'+p.dmg);
@@ -172,7 +172,7 @@
 
     // ── ticket probability chart (SVG) ──
     (function(){
-      var perRun=1; for(var i=1;i<=4;i++) perRun*=(1-EARLY_TIX[i]/100); perRun=1-perRun;  // >=1 tix per run (reach L4)
+      var PASSB=0.07; var perRun=1-Math.pow(1-PASSB,2);  // pass per full completion (2 final bosses ×7%)
       var W=680,H=260,pad={l:44,r:16,t:16,b:34}, N=12, TOT=500;
       var x=n=>pad.l+(n-1)/(N-1)*(W-pad.l-pad.r);
       var y=v=>H-pad.b-(v/TOT)*(H-pad.t-pad.b);
@@ -191,11 +191,11 @@
         '<path d="'+line+'" fill="none" stroke="#ea580c" stroke-width="2.5"/>'+
         pts.map(function(p){return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3" fill="#ea580c"/>';}).join('')+
         xlab+
-        '<text x="'+((W)/2)+'" y="'+(H-2)+'" font-size="10" fill="#64748b" text-anchor="middle">забегов на игрока</text>'+
+        '<text x="'+((W)/2)+'" y="'+(H-2)+'" font-size="10" fill="#64748b" text-anchor="middle">полных прохождений (7-й ур.) на игрока / мес</text>'+
         '</svg>';
       document.getElementById('tixChart').innerHTML=svg;
       var half50 = Math.log(0.5)/Math.log(1-perRun);
-      document.getElementById('tixChartNote').innerHTML='Шанс билета за 1 забег (дойти до 4-го босса): <b>'+(perRun*100).toFixed(0)+'%</b>. Половина из 500 (<b>250</b>) получают билет уже за <b>~'+half50.toFixed(1)+' забега</b>. За 3 забега — <b>'+Math.round(TOT*(1-Math.pow(1-perRun,3)))+'</b> из 500.';
+      document.getElementById('tixChartNote').innerHTML='Шанс пасса за 1 прохождение (2 босса ×7%): <b>'+(perRun*100).toFixed(1)+'%</b>. <b>250 из 500</b> получают пасс при <b>~'+half50.toFixed(1)+' прохождениях</b> на игрока за месяц. При 10 прох. — <b>'+Math.round(TOT*(1-Math.pow(1-perRun,10)))+'</b> из 500.';
     })();
   </script>
 </body>

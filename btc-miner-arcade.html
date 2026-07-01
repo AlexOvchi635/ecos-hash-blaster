@@ -389,7 +389,7 @@ body.shake{animation:shake .12s linear infinite;}
   <h1 class="start-title">ECOS Hash Blaster</h1>
   <p class="start-sub">Tap to shoot · 1 MP per shot · tickets drop from bosses (Lvl 5+)</p>
   <button class="start-btn" id="startBtn">START</button>
-  <button class="start-lb" id="startLbBtn">🏆 Leaderboard</button>
+  <button class="start-lb" id="startLbBtn" style="display:none;">🏆 Leaderboard</button>
 </div>
 
 <!-- DEV PANEL -->
@@ -450,11 +450,11 @@ const ECO = {
   BASE_WAVE_DROPS:26, WAVE_DROP_SCALE:4,          // LONG levels — 30..54 blocks before the boss
   FALL_STEP:0.08,                                 // block fall speed +8% per level (ramps noticeably)
   MP_BOX_MIN:1, MP_BOX_MAX:3, SAT_MP:1,           // box returns 1–3 MP (mostly 1) — burn more MP
-  RAFFLE_LEVEL:7, RAFFLE_CHANCE:0.01,             // pass drops only on the Lvl 7 (final) boss, 1%
+  RAFFLE_LEVEL:7, RAFFLE_CHANCE:0.07,             // pass: each of the 2 final bosses rolls 7% (~13.5%/run) — target ~250/500 over a month
 };
 // 7 finite levels — boss HP tuned to the FIXED power curve (guns 2→3→4, then dmg ×2). Early bosses easy, ramp 36→70 shots.
 const BOSS_HP          = [0, 45, 75, 110, 230, 300, 1000, 2000];  // index by level 1..7 (L5-7 are ×2 bosses, HP each)
-const EARLY_TIX_CHANCE = [0, 0.05, 0.10, 0.15, 0.25];             // L1-4 hidden ticket drop chance (see economy doc)
+const EARLY_TIX_CHANCE = [0, 0.01, 0.02, 0.03, 0.05];             // L1-4 hidden ticket drop chance (see economy doc)
 const TICKETS_BY_LEVEL = [0, 0, 0, 0, 0, 2, 3, 0];                 // L5=2, L6=3 🎟 · L7 = raffle pass
 function bossHpForWave(w){ return BOSS_HP[Math.min(w, ECO.MAX_LEVEL)]; }
 function bossTixForWave(w){ return TICKETS_BY_LEVEL[Math.min(w, ECO.MAX_LEVEL)] || 0; }
