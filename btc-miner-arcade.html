@@ -480,7 +480,7 @@ const state = {
   bossesKilledThisRun:0, sessionStart: performance.now()
 };
 function dangerY(){ return H - 150; }
-function hitZoneTop(){ return H*0.5; }   // boxes only take damage below this line (must fall past it first)
+function hitZoneTop(){ return 54; }   // right under the HUD — boxes hittable everywhere below, not while hidden behind the top bar
 state.rig.x = W/2; state.rig.y = H - 78;
 function rand(a,b){return a+Math.random()*(b-a);}
 
@@ -930,13 +930,12 @@ function render(){
   ctx.fillStyle='rgba(220,38,38,.6)'; ctx.font='bold 9px monospace'; ctx.textAlign='left'; ctx.textBaseline='top';
   ctx.fillText('⚠ DANGER ZONE', 8, dy2+4);
 
-  // hit zone — boxes only take damage below this line
+  // hit zone starts right under the HUD — boxes above it (hidden behind the bar) can't be hit
   const hz=hitZoneTop();
-  ctx.fillStyle='rgba(37,99,235,.04)'; ctx.fillRect(0,hz,W,dy2-hz);   // subtle active-zone tint
-  ctx.strokeStyle='rgba(37,99,235,.5)'; ctx.lineWidth=2; ctx.setLineDash([10,7]);
+  ctx.strokeStyle='rgba(37,99,235,.4)'; ctx.lineWidth=1.5; ctx.setLineDash([8,6]);
   ctx.beginPath(); ctx.moveTo(0,hz); ctx.lineTo(W,hz); ctx.stroke(); ctx.setLineDash([]);
-  ctx.fillStyle='rgba(37,99,235,.65)'; ctx.font='bold 9px monospace'; ctx.textAlign='left'; ctx.textBaseline='bottom';
-  ctx.fillText('▼ HIT ZONE — сбивай здесь', 8, hz-3);
+  ctx.fillStyle='rgba(37,99,235,.55)'; ctx.font='bold 8px monospace'; ctx.textAlign='right'; ctx.textBaseline='top';
+  ctx.fillText('HIT ZONE ▼', W-8, hz+3);
 
   // prizes
   const hzT=hitZoneTop();
