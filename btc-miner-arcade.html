@@ -378,7 +378,7 @@ body.shake{animation:shake .12s linear infinite;}
   </div>
 </div>
 
-<div id="help">shot = 1 MP · guns → power · tickets from Lvl 5 · 7 levels</div>
+<div id="help" style="display:none;"></div>
 
 <!-- START SCREEN -->
 <div class="start-screen" id="startScreen">
@@ -928,7 +928,7 @@ function render(){
   ctx.beginPath(); ctx.moveTo(0,dy2); ctx.lineTo(W,dy2); ctx.stroke(); ctx.setLineDash([]);
   ctx.fillStyle='rgba(220,38,38,'+(0.04+flash*.12)+')'; ctx.fillRect(0,dy2,W,H-dy2);
   ctx.fillStyle='rgba(220,38,38,.6)'; ctx.font='bold 9px monospace'; ctx.textAlign='left'; ctx.textBaseline='top';
-  ctx.fillText('⚠ DANGER ZONE', 8, dy2+4);
+  ctx.fillText('DANGER ZONE', 8, dy2+4);
 
   // hit zone is invisible now (mechanic still active: boxes above hitZoneTop() can't be hit)
 
